@@ -1904,6 +1904,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6443c87b0c1e0194cae409641ce01fb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  horizontalTurnSpeed: 1.5
+  verticalTurnSpeed: 1.5
   firePoint: {fileID: 7180988645782221164}
   firePower: 3
   fireballPrefab: {fileID: -6484469989412504249, guid: 6a49cce788c443b41bb395be49e9f17a,
