@@ -1121,7 +1121,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: bc69fc6ad5b6c7645aa0c00ecda79767, type: 2}
+  - {fileID: 2100000, guid: c33a548d6df8c8a4daca736f3300dd9c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1905,7 +1905,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firePoint: {fileID: 7180988645782221164}
-  firePower: 5
+  firePower: 3
   fireballPrefab: {fileID: -6484469989412504249, guid: 6a49cce788c443b41bb395be49e9f17a,
     type: 3}
 --- !u!114 &1526167701685888552
@@ -1920,7 +1920,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3230a3f3a9b28cc4ca5ef64c619ecc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numPoints: 35
+  numPoints: 50
   timeBetweenPoints: 0.01
   planeMask:
     serializedVersion: 2
@@ -1945,7 +1945,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 45dabb7c4a4ac9046ba237647b59811d, type: 2}
+  - {fileID: 2100000, guid: 9c8b1244fcacb6d45a6f4afd2af37c50, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1982,15 +1982,6 @@ LineRenderer:
         weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
-      - serializedVersion: 3
-        time: 1
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4

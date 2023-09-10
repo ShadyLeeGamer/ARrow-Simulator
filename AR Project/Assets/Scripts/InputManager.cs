@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,7 +16,6 @@ public class InputManager : MonoBehaviour
     [SerializeField] Wizard wizardPrefab;
     [SerializeField] LayerMask wizardLayerMask;
 
-    private bool horizontalRotationInput = false;
     [SerializeField] float horizontalRotationSpeed;
 
     Vector3 wizardPlacePos;
@@ -29,8 +29,14 @@ public class InputManager : MonoBehaviour
     ARPlaneManager aRPlaneManager;
     ARAnchorManager aRAnchorManager;
 
+    public event Action<ARPlane> OnWizardPlaced;
+
+    public static InputManager Instance { get; private set; }
+
     private void Awake()
     {
+        Instance = this;
+
         aRRaycastManager = GetComponent<ARRaycastManager>();
         aRPlaneManager = GetComponent<ARPlaneManager>();
         aRAnchorManager = GetComponent<ARAnchorManager>();
@@ -72,11 +78,13 @@ public class InputManager : MonoBehaviour
             TrackableType.PlaneWithinPolygon))
         {
             ARRaycastHit hit = hits[0];
-            wizardPose = hit.pose;
-            wizardPlane = aRPlaneManager.GetPlane(hit.trackableId);
 
-            if (wizardPlane.alignment == PlaneAlignment.HorizontalUp)
+            ARPlane plane = aRPlaneManager.GetPlane(hit.trackableId);
+            if (plane.alignment == PlaneAlignment.HorizontalUp)
             {
+                wizardPose = hit.pose;
+                wizardPlane = plane;
+
                 ghost.position = wizardPlacePos = wizardPose.position;
 
                 Vector3 dirToCam = cam.transform.position - wizardPlacePos;
@@ -101,16 +109,6 @@ public class InputManager : MonoBehaviour
         }
         else
         {
-            Ray ray = cam.ScreenPointToRay(Input.touches[0].position);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, wizardLayerMask))
-            {
-                if (hit.transform.GetComponent<Wizard>())
-                {
-                    horizontalRotationInput = true;
-                }
-            }
-
             currentWizard.Fire();
         }
     }
@@ -118,9 +116,9 @@ public class InputManager : MonoBehaviour
     void WizardOnPlane()
     {
         currentWizard = Instantiate(wizardPrefab, wizardPlacePos, wizardPlaceRot);
-
         currentWizard.gameObject.AddComponent<ARAnchor>();
-        //aRAnchorManager.AttachAnchor(wizardPlane, wizardPose);
+
+        OnWizardPlaced?.Invoke(wizardPlane);
     }
 
     void OnFingerMove(EnhancedTouch.Finger finger)
@@ -138,22 +136,19 @@ public class InputManager : MonoBehaviour
 
     void HorizontalRotation(Vector2 touchDeltaPosition)
     {
-        if (horizontalRotationInput)
-        {
-            Touch touch = Input.GetTouch(0);
-            currentWizard.transform.Rotate(0f,
-                touch.deltaPosition.x * horizontalRotationSpeed, 0f);
-        }
+        Touch touch = Input.GetTouch(0);
+        currentWizard.transform.Rotate(0f,
+            touch.deltaPosition.x * horizontalRotationSpeed, 0f);
     }
 
     void OnFingerUp(EnhancedTouch.Finger finger)
     {
-        horizontalRotationInput = false;
     }
 
     public void RemoveCurrentObj()
     {
         Destroy(currentWizard.gameObject);
+        aRPlaneManager.enabled = true;
     }
 
     bool IsPointerOverUI(Vector2 touchPosition)

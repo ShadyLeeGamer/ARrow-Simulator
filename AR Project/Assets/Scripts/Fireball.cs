@@ -14,6 +14,6 @@ public class Fireball : MonoBehaviour
     private void Update()
     {
         velocity -= Physics.gravity;
-        transform.position += velocity;
+        transform.Translate(velocity);
     }
 }

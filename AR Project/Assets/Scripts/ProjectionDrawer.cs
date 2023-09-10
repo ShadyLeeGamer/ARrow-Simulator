@@ -10,9 +10,16 @@ public class ProjectionDrawer : MonoBehaviour
 
     LineRenderer lineRenderer;
 
+    ARPlanesTrackedManager planeTrackedManager;
+
     private void Awake()
     {
         lineRenderer = GetComponent<LineRenderer>();
+    }
+
+    private void Start()
+    {
+        planeTrackedManager = ARPlanesTrackedManager.Instance;
     }
 
     public void Draw(Vector3 startPos, Vector3 startVelocity)
@@ -26,7 +33,8 @@ public class ProjectionDrawer : MonoBehaviour
             newPoint.y = startPos.y + startVelocity.y * t + Physics.gravity.y / 2f * t * t;
             points.Add(newPoint);
 
-            if (Physics.OverlapSphere(newPoint, 0.005f, planeMask).Length > 0)
+            if (Physics.OverlapSphere(newPoint, 0.05f, planeMask).Length > 0 ||
+                newPoint.y <= planeTrackedManager.BedrockPosY)
             {
                 lineRenderer.positionCount = points.Count;
                 break;
