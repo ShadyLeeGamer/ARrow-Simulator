@@ -11,7 +11,6 @@ public class InputManager : MonoBehaviour
 
     public Action<float> OnHorizontalRotateInput;
     public Action<float> OnVerticalRotateInput;
-    public Action OnFireInput;
 
     public static InputManager Instance { get; private set; }
 
@@ -49,11 +48,6 @@ public class InputManager : MonoBehaviour
         if (finger.index != 0 ||
             IsPointerOverUI(finger.currentTouch.screenPosition))
             return;
-
-        if (gameManager.TurnType == GameManager.TurnTypes.Battle)
-        {
-            OnFireInput?.Invoke();
-        }
     }
 
     void OnFingerMove(EnhancedTouch.Finger finger)

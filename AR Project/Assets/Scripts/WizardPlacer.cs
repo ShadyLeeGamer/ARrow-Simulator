@@ -81,7 +81,7 @@ public class WizardPlacer : MonoBehaviour
         }
     }
 
-    public void OnPlanesChanged(ARPlanesChangedEventArgs planesChanged)
+    void OnPlanesChanged(ARPlanesChangedEventArgs planesChanged)
     {
         foreach (ARPlane plane in planesChanged.added)
         {
@@ -99,7 +99,14 @@ public class WizardPlacer : MonoBehaviour
         }
     }
 
-    public void TrackWizardPlane(ARPlane wizardPlane)
+    public void PendWizardOnPlane()
+    {
+        pendingWizard = Instantiate(wizardPrefab, wizardPlacePos, wizardPlaceRot);
+        pendingWizard.Initialise(cam);
+        pendingWizard.gameObject.AddComponent<ARAnchor>();
+    }
+
+    void TrackWizardPlane(ARPlane wizardPlane)
     {
         if (wizardPlane.transform.position.y < PlanesTrackedMetrics.BedrockPosY)
         {
@@ -114,12 +121,6 @@ public class WizardPlacer : MonoBehaviour
         }
 
         wizardPlanes.Add(wizardPlane);
-    }
-
-    public void PendWizardOnPlane()
-    {
-        pendingWizard = Instantiate(wizardPrefab, wizardPlacePos, wizardPlaceRot);
-        pendingWizard.gameObject.AddComponent<ARAnchor>();
     }
 
     public void ConfirmWizardOnPlane()

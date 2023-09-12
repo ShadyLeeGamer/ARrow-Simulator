@@ -13,7 +13,7 @@ public class Fireball : MonoBehaviour
 
     private void Update()
     {
-        velocity -= Physics.gravity;
-        transform.Translate(velocity);
+        velocity += Physics.gravity * Time.deltaTime;
+        transform.position += velocity * Time.deltaTime;
     }
 }

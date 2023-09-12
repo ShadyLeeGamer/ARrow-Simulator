@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,8 +9,13 @@ public class GameCanvas : MonoBehaviour
     [SerializeField] GameObject battleButtons;
     GameObject currentButtons;
 
+    [SerializeField] Slider powerSlider;
+
     WizardPlacer wizardPlacer;
     GameManager gameManager;
+
+    public Action<float> OnFireReleaseInput;
+    public Action<float> OnFireHoldInput;
 
     public static GameCanvas Instance { get; private set; }
 
@@ -58,8 +62,15 @@ public class GameCanvas : MonoBehaviour
             : battleButtons);
     }
 
-    public void EndBattleTurnButton()
+    public void FirePowerSliderHold()
     {
+        OnFireHoldInput?.Invoke(powerSlider.value);
+    }
+
+    public void FirePowerSliderRelease()
+    {
+        OnFireReleaseInput?.Invoke(powerSlider.value);
+        powerSlider.value = 0;
         gameManager.EndBattleTurn();
     }
 }

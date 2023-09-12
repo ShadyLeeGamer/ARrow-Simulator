@@ -17,8 +17,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        Debug.developerConsoleVisible = true;
-        Debug.LogError("hello");
     }
 
     private void Start()

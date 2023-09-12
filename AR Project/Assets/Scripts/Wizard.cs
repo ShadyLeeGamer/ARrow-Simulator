@@ -6,16 +6,26 @@ public class Wizard : MonoBehaviour
     [SerializeField] float verticalTurnSpeed;
 
     [SerializeField] Transform firePoint;
-    [SerializeField] float firePower;
     [SerializeField] Fireball fireballPrefab;
+    [SerializeField] float firePowerMin, firePowerMax;
+
+    [SerializeField] Transform neckRig;
+
+    [SerializeField] Canvas UI;
 
     InputManager inputManager;
+    GameCanvas gameCanvas;
 
     ProjectionDrawer projectionDrawer;
 
-    bool isRotating;
+    Camera cam;
 
     public bool Active { get; set; }
+
+    public void Initialise(Camera cam)
+    {
+        this.cam = cam;
+    }
 
     private void Awake()
     {
@@ -27,7 +37,10 @@ public class Wizard : MonoBehaviour
         inputManager = InputManager.Instance;
         inputManager.OnHorizontalRotateInput += TurnHorizontally;
         inputManager.OnVerticalRotateInput += TurnVertically;
-        inputManager.OnFireInput += Fire;
+
+        gameCanvas = GameCanvas.Instance;
+        gameCanvas.OnFireHoldInput += FireHold;
+        gameCanvas.OnFireReleaseInput += FireRelease;
     }
 
     void TurnHorizontally(float deltaX)
@@ -36,8 +49,6 @@ public class Wizard : MonoBehaviour
             return;
 
         transform.Rotate(0f, deltaX * horizontalTurnSpeed, 0f);
-
-        isRotating = true;
     }
 
     void TurnVertically(float deltaY)
@@ -46,34 +57,40 @@ public class Wizard : MonoBehaviour
             return;
 
         firePoint.Rotate(deltaY * verticalTurnSpeed, 0f, 0f);
-        firePoint.localEulerAngles = new Vector3(
-            Mathf.Clamp(firePoint.eulerAngles.x, 0f, 180f), 0f, 0f);
-
-        isRotating = true;
+        float xClamped = firePoint.eulerAngles.x;
+        if (xClamped > 90)
+            xClamped = 90;
+        else if (xClamped < -90)
+            xClamped = -90;
+        firePoint.eulerAngles = new Vector3(xClamped,
+            firePoint.eulerAngles.y, firePoint.eulerAngles.z);
+        neckRig.localEulerAngles = new Vector3(0f, 0f, xClamped);
     }
 
     private void Update()
     {
+        Vector3 dirToCam = cam.transform.position - transform.position;
+        UI.transform.rotation = Quaternion.LookRotation(dirToCam);
+
         if (!Active)
             return;
-
-        if (isRotating)
-        {
-            projectionDrawer.Draw(firePoint.position, firePoint.up * firePower);
-        }
-        else
-        {
-            isRotating = false;
-        }
     }
 
-    public void Fire()
+    Vector3 FireVelocity(float percent) => firePoint.forward *
+        Mathf.Lerp(firePowerMin, firePowerMax, percent);
+
+    public void FireHold(float powerPercent)
+    {
+        projectionDrawer.Draw(firePoint.position, FireVelocity(powerPercent));
+    }
+
+    public void FireRelease(float powerPercent)
     {
         if (!Active)
             return;
 
-/*        Instantiate(fireballPrefab, firePoint.position, Quaternion.identity)
-            .Initialise(firePoint.up * firePower);*/
+        Instantiate(fireballPrefab, firePoint.position, Quaternion.identity)
+            .Initialise(FireVelocity(powerPercent));
     }
 
     public void SetActive(bool active)
@@ -90,6 +107,8 @@ public class Wizard : MonoBehaviour
     {
         inputManager.OnHorizontalRotateInput -= TurnHorizontally;
         inputManager.OnHorizontalRotateInput -= TurnVertically;
-        inputManager.OnFireInput -= Fire;
+
+        gameCanvas.OnFireHoldInput -= FireHold;
+        gameCanvas.OnFireReleaseInput -= FireRelease;
     }
 }
