@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class GameCanvas : MonoBehaviour
@@ -9,10 +10,13 @@ public class GameCanvas : MonoBehaviour
     [SerializeField] GameObject battleButtons;
     GameObject currentButtons;
 
+    [SerializeField] FixedJoystick joystick;
     [SerializeField] Slider powerSlider;
 
     WizardPlacer wizardPlacer;
     GameManager gameManager;
+
+    public Action<Vector2> OnJoystickInput;
 
     public Action<float> OnFireReleaseInput;
     public Action<float> OnFireHoldInput;
@@ -30,6 +34,15 @@ public class GameCanvas : MonoBehaviour
 
         wizardPlacer = WizardPlacer.Instance;
         gameManager = GameManager.Instance;
+    }
+
+    private void Update()
+    {
+        if (gameManager.TurnType == GameManager.TurnTypes.Battle &&
+            joystick.Direction != Vector2.zero)
+        {
+            OnJoystickInput?.Invoke(joystick.Direction);
+        }
     }
 
     public void EnableButtons(GameObject buttons)
@@ -71,6 +84,5 @@ public class GameCanvas : MonoBehaviour
     {
         OnFireReleaseInput?.Invoke(powerSlider.value);
         powerSlider.value = 0;
-        gameManager.EndBattleTurn();
     }
 }

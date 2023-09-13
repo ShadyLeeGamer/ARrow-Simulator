@@ -140,14 +140,7 @@ public class WizardPlacer : MonoBehaviour
     {
         foreach (ARPlane plane in planeManager.trackables)
         {
-            if (!wizardPlanes.Contains(plane)) // Remove other planes
-            {
-                plane.gameObject.SetActive(false);
-            }
-            else
-            {
-                plane.GetComponent<MeshRenderer>().enabled = false;
-            }
+            plane.GetComponent<MeshRenderer>().enabled = false;
         }
 
         planeManager.enabled = false;

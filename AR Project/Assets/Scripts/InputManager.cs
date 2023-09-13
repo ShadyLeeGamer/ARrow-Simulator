@@ -44,17 +44,13 @@ public class InputManager : MonoBehaviour
 
     void OnFingerDown(EnhancedTouch.Finger finger)
     {
-        // Ignore multi-touch
-        if (finger.index != 0 ||
-            IsPointerOverUI(finger.currentTouch.screenPosition))
+        if (IsPointerOverUI(finger.currentTouch.screenPosition))
             return;
     }
 
     void OnFingerMove(EnhancedTouch.Finger finger)
     {
-        // Ignore multi-touch
-        if (finger.index != 0 ||
-            IsPointerOverUI(finger.currentTouch.screenPosition))
+        if (IsPointerOverUI(finger.currentTouch.screenPosition))
             return;
 
         if (gameManager.TurnType == GameManager.TurnTypes.Battle)

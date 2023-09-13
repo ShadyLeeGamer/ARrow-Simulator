@@ -13,6 +13,10 @@ public class Wizard : MonoBehaviour
 
     [SerializeField] Canvas UI;
 
+    [SerializeField] Bar healthBar;
+    [SerializeField] int maxHealth;
+    int health;
+
     InputManager inputManager;
     GameCanvas gameCanvas;
 
@@ -34,11 +38,14 @@ public class Wizard : MonoBehaviour
 
     private void Start()
     {
+        healthBar.SetMaxValue(maxHealth);
+
         inputManager = InputManager.Instance;
-        inputManager.OnHorizontalRotateInput += TurnHorizontally;
-        inputManager.OnVerticalRotateInput += TurnVertically;
+/*        inputManager.OnHorizontalRotateInput += TurnHorizontally;
+        inputManager.OnVerticalRotateInput += TurnVertically;*/
 
         gameCanvas = GameCanvas.Instance;
+        gameCanvas.OnJoystickInput += Rotate;
         gameCanvas.OnFireHoldInput += FireHold;
         gameCanvas.OnFireReleaseInput += FireRelease;
     }
@@ -58,10 +65,10 @@ public class Wizard : MonoBehaviour
 
         firePoint.Rotate(deltaY * verticalTurnSpeed, 0f, 0f);
         float xClamped = firePoint.eulerAngles.x;
-        if (xClamped > 90)
-            xClamped = 90;
-        else if (xClamped < -90)
-            xClamped = -90;
+/*        if (xClamped > 90f && xClamped < 180f)
+            xClamped = 90f; 
+        else if (xClamped < 360f + -90 && xClamped > 180f)
+            xClamped = 360f  + - 90f;*/
         firePoint.eulerAngles = new Vector3(xClamped,
             firePoint.eulerAngles.y, firePoint.eulerAngles.z);
         neckRig.localEulerAngles = new Vector3(0f, 0f, xClamped);
@@ -76,21 +83,50 @@ public class Wizard : MonoBehaviour
             return;
     }
 
+    void Rotate(Vector2 dir)
+    {
+        TurnHorizontally(dir.x);
+        TurnVertically(-dir.y);
+    }
+
     Vector3 FireVelocity(float percent) => firePoint.forward *
         Mathf.Lerp(firePowerMin, firePowerMax, percent);
 
-    public void FireHold(float powerPercent)
+    void FireHold(float powerPercent)
     {
+        if (!Active)
+            return;
+
         projectionDrawer.Draw(firePoint.position, FireVelocity(powerPercent));
     }
 
-    public void FireRelease(float powerPercent)
+    void FireRelease(float powerPercent)
     {
         if (!Active)
             return;
 
         Instantiate(fireballPrefab, firePoint.position, Quaternion.identity)
             .Initialise(FireVelocity(powerPercent));
+
+        SetActive(false);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        if (health > 0)
+        {
+            healthBar.SetValue(health -= damage);
+        }
+        else
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Destroy(gameObject);
     }
 
     public void SetActive(bool active)

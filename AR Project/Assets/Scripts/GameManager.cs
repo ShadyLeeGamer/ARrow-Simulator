@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 
     Player[] players = new Player[NUM_PLAYER];
     public int CurrentPlayerIndex { get; private set; }
+    public Player CurrentPlayer => players[CurrentPlayerIndex];
 
     public enum TurnTypes { Place, Battle }
     public TurnTypes TurnType { get; private set; }
@@ -70,8 +71,6 @@ public class GameManager : MonoBehaviour
 
     public void EndBattleTurn()
     {
-        players[CurrentPlayerIndex].Wizard.SetActive(false);
-
         if (!NextTurn())
         {
             CurrentPlayerIndex = 0; // Wrap
