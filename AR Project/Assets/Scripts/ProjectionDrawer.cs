@@ -14,11 +14,11 @@ public class ProjectionDrawer : MonoBehaviour
         lineRenderer = GetComponent<LineRenderer>();
     }
 
-    public void Draw(Vector3 startPos, Vector3 startVelocity)
+    public void DrawWhole(Vector3 startPos, Vector3 startVelocity)
     {
         lineRenderer.positionCount = numPoints;
 
-        List<Vector3> points = new();
+        List<Vector3> points = new List<Vector3>();
         for (float t = 0; t < numPoints; t += timeBetweenPoints)
         {
             Vector3 newPoint = startPos + t * startVelocity;

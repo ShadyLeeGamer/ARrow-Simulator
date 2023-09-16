@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class GameCanvas : MonoBehaviour
@@ -13,13 +12,8 @@ public class GameCanvas : MonoBehaviour
     [SerializeField] FixedJoystick joystick;
     [SerializeField] Slider powerSlider;
 
-    WizardPlacer wizardPlacer;
+    ArcherPlacer archerPlacer;
     GameManager gameManager;
-
-    public Action<Vector2> OnJoystickInput;
-
-    public Action<float> OnFireReleaseInput;
-    public Action<float> OnFireHoldInput;
 
     public static GameCanvas Instance { get; private set; }
 
@@ -32,7 +26,7 @@ public class GameCanvas : MonoBehaviour
     {
         EnableButtons(placeButtons);
 
-        wizardPlacer = WizardPlacer.Instance;
+        archerPlacer = ArcherPlacer.Instance;
         gameManager = GameManager.Instance;
     }
 
@@ -41,7 +35,7 @@ public class GameCanvas : MonoBehaviour
         if (gameManager.TurnType == GameManager.TurnTypes.Battle &&
             joystick.Direction != Vector2.zero)
         {
-            OnJoystickInput?.Invoke(joystick.Direction);
+            gameManager.CurrentPlayer.Archer.TurnHorizontally(joystick.Direction.x);
         }
     }
 
@@ -58,31 +52,36 @@ public class GameCanvas : MonoBehaviour
     public void PlaceButton()
     {
         EnableButtons(placedButtons);
-        wizardPlacer.PendWizardOnPlane();
+        archerPlacer.PendOnPlane();
     }
 
     public void ReplaceButton()
     {
         EnableButtons(placeButtons);
-        wizardPlacer.ReplaceWizard();
+        archerPlacer.Replace();
     }
 
     public void EndTurnPlaceButton()
     {
-        wizardPlacer.ConfirmWizardOnPlane();
+        archerPlacer.ConfirmOnPlane();
         EnableButtons(gameManager.TurnType == GameManager.TurnTypes.Place
             ? placeButtons
             : battleButtons);
     }
 
+    public void FirePowerSliderBegin()
+    {
+        gameManager.CurrentPlayer.Archer.FireBegin();
+    }
+
     public void FirePowerSliderHold()
     {
-        OnFireHoldInput?.Invoke(powerSlider.value);
+        gameManager.CurrentPlayer.Archer.FireHold(powerSlider.value);
     }
 
     public void FirePowerSliderRelease()
     {
-        OnFireReleaseInput?.Invoke(powerSlider.value);
+        gameManager.CurrentPlayer.Archer.FireRelease(powerSlider.value);
         powerSlider.value = 0;
     }
 }

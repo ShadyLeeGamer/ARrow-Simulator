@@ -1,25 +1,33 @@
+using System;
 using UnityEngine;
 
 public class Fireball : MonoBehaviour
 {
     [SerializeField] int damage;
-    [SerializeField] LayerMask wizardMask;
+    [SerializeField] LayerMask hitMask;
 
-    float radius;
+    [SerializeField] float radius;
 
     Vector3 velocity;
     Vector3 lastPos;
 
     GameManager gameManager;
 
+    public Action<Fireball> OnExplode;
+
+    MeshRenderer renderer;
+    TrailRenderer trailRenderer;
+
     public void Initialise(Vector3 startVelocity)
     {
         velocity = startVelocity;
+        trailRenderer = GetComponent<TrailRenderer>();
+        trailRenderer.enabled = true;
     }
 
     private void Start()
     {
-        radius = GetComponent<SphereCollider>().radius;
+        renderer = GetComponent<MeshRenderer>();
 
         gameManager = GameManager.Instance;
     }
@@ -30,19 +38,25 @@ public class Fireball : MonoBehaviour
         lastPos = transform.position;
         transform.position += velocity * Time.deltaTime;
 
-        float maxDistance = Vector2.Distance(transform.position, lastPos);
+        float maxDistance = Vector3.Distance(transform.position, lastPos);
         if (Physics.SphereCast(lastPos, radius, velocity.normalized,
-            out RaycastHit hit, maxDistance, wizardMask))
+            out RaycastHit hit, maxDistance, hitMask))
         {
-            var otherWizard = hit.transform.GetComponent<Wizard>();
-            if (otherWizard != null && otherWizard != gameManager.CurrentPlayer.Wizard)
+            if (hit.transform.TryGetComponent<Archer>(out var otherArcher))
             {
-                otherWizard.TakeDamage(damage);
+                if (otherArcher != gameManager.CurrentPlayer.Archer)
+                {
+                    otherArcher.TakeDamage(damage);
+                    Explode();
+                }
+            }
+            else if (hit.transform.TryGetComponent<Item>(out var item))
+            {
+                item.Use();
                 Explode();
             }
         }
-
-        if (transform.position.y <= PlanesTrackedMetrics.BedrockPosY)
+        else if (transform.position.y <= PlanesTrackedMetrics.BedrockPosY)
         {
             Explode();
         }
@@ -50,7 +64,16 @@ public class Fireball : MonoBehaviour
 
     void Explode()
     {
+        gameManager.CurrentPlayer.Archer.SaveLastTrajectory(trailRenderer);
         gameManager.EndBattleTurn();
-        Destroy(gameObject);
+
+        renderer.enabled = false;
+        Destroy(this);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, radius);
     }
 }

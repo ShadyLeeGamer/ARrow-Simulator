@@ -1,17 +1,17 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public const int NUM_PLAYER = 2;
-
-    Player[] players = new Player[NUM_PLAYER];
+    public Player[] Players { get; private set; }
     public int CurrentPlayerIndex { get; private set; }
-    public Player CurrentPlayer => players[CurrentPlayerIndex];
+    public Player CurrentPlayer => Players[CurrentPlayerIndex];
 
     public enum TurnTypes { Place, Battle }
     public TurnTypes TurnType { get; private set; }
 
-    WizardPlacer wizardPlacer;
+    ArcherPlacer archerPlacer;
+    ItemSpawner itemSpawner;
 
     public static GameManager Instance { get; private set; }
 
@@ -22,11 +22,16 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        wizardPlacer = WizardPlacer.Instance;
+        archerPlacer = ArcherPlacer.Instance;
+        itemSpawner = ItemSpawner.Instance;
+    }
 
-        for (int i = 0; i < players.Length; i++)
+    public void StartGame(InputField[] playerInputFields)
+    {
+        Players = new Player[playerInputFields.Length];
+        for (int i = 0; i < playerInputFields.Length; i++)
         {
-            players[i] = new();
+            Players[i] = new Player(playerInputFields[i].text);
         }
 
         StartPlaceTurns();
@@ -34,7 +39,7 @@ public class GameManager : MonoBehaviour
 
     bool NextTurn()
     {
-        if (CurrentPlayerIndex < NUM_PLAYER - 1)
+        if (CurrentPlayerIndex < Players.Length - 1)
         {
             CurrentPlayerIndex++;
             return true;
@@ -47,21 +52,22 @@ public class GameManager : MonoBehaviour
     {
         CurrentPlayerIndex = 0;
         TurnType = TurnTypes.Place;
-        wizardPlacer.enabled = true;
+        archerPlacer.enabled = true;
     }
 
     void StartBattleTurns()
     {
-        wizardPlacer.enabled = false;
+        itemSpawner.Initialise(archerPlacer.Planes.ToArray());
+        archerPlacer.enabled = false;
 
         CurrentPlayerIndex = 0;
         TurnType = TurnTypes.Battle;
-        players[CurrentPlayerIndex].Wizard.SetActive(true);
+        Players[CurrentPlayerIndex].Archer.SetActive(true);
     }
 
-    public void EndPlaceTurn(Wizard wizard)
+    public void EndPlaceTurn(Archer archer)
     {
-        players[CurrentPlayerIndex].SetWizard(wizard);
+        Players[CurrentPlayerIndex].SetArcher(archer);
 
         if (!NextTurn())
         {
@@ -74,19 +80,27 @@ public class GameManager : MonoBehaviour
         if (!NextTurn())
         {
             CurrentPlayerIndex = 0; // Wrap
+
+            itemSpawner.Spawn();
         }
 
-        players[CurrentPlayerIndex].Wizard.SetActive(true);
+        Players[CurrentPlayerIndex].Archer.SetActive(true);
     }
 }
 
 public struct Player
 {
-    public string name;
-    public Wizard Wizard { get; private set; }
+    string name;
+    public Archer Archer { get; private set; }
 
-    public void SetWizard(Wizard wizard)
+    public Player(string name)
     {
-        Wizard = wizard;
+        this.name = name;
+        Archer = null;
+    }
+
+    public void SetArcher(Archer archer)
+    {
+        Archer = archer;
     }
 }
