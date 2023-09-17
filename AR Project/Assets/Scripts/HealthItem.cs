@@ -8,6 +8,6 @@ public class HealthItem : Item
 
     public override void Use()
     {
-        gameManager.CurrentPlayer.Archer.AddHealth(health);
+        gameManager.CurrentPlayer.archer.AddHealth(health);
     }
 }

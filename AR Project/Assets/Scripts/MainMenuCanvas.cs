@@ -1,16 +1,13 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MainMenuCanvas : MonoBehaviour
 {
-    const float MAX_NUM_PLAYERS = 4;
-    const float MIN_NUM_PLAYERS = 2;
-
     [SerializeField] PlayerNameInput playerNameInputPrefab;
     [SerializeField] Transform playerNameInputLayerGroup;
 
-    public List<InputField> PlayerNameInputs { get; private set; }
+    InputField[] playerNameInputs;
+    int playerNameInputsLength;
 
     GameManager gameManager;
 
@@ -23,7 +20,7 @@ public class MainMenuCanvas : MonoBehaviour
 
     private void Start()
     {
-        PlayerNameInputs = new List<InputField>();
+        playerNameInputs = new InputField[GameManager.MAX_NUM_PLAYERS];
 
         AddPlayerBtn();
         AddPlayerBtn();
@@ -33,27 +30,30 @@ public class MainMenuCanvas : MonoBehaviour
 
     public void AddPlayerBtn()
     {
-        if (PlayerNameInputs.Count == MAX_NUM_PLAYERS)
+        if (playerNameInputsLength == GameManager.MAX_NUM_PLAYERS)
             return;
 
-        PlayerNameInput nameInput = Instantiate(playerNameInputPrefab, playerNameInputLayerGroup);
-        PlayerNameInputs.Add(nameInput.Field);
-        nameInput.RefershLabel(PlayerNameInputs.Count);
+        PlayerNameInput nameInput =
+            Instantiate(playerNameInputPrefab, playerNameInputLayerGroup);
+        playerNameInputs[playerNameInputsLength] = nameInput.Field;
+        playerNameInputsLength++;
+        nameInput.RefershLabel(playerNameInputsLength);
         
     }
 
     public void RemovePlayer(InputField playerNameInput)
     {
-        if (PlayerNameInputs.Count == MIN_NUM_PLAYERS)
+        if (playerNameInputsLength == GameManager.MIN_NUM_PLAYERS)
             return;
 
         Destroy(playerNameInput.gameObject);
-        PlayerNameInputs.Remove(playerNameInput);
+        playerNameInputsLength--;
     }
 
     public void StartBtn()
     {
-        gameManager.StartGame(PlayerNameInputs.ToArray());
+        Debug.Log(playerNameInputsLength);
+        gameManager.StartGame(playerNameInputs, playerNameInputsLength);
         gameObject.SetActive(false);
     }
 }

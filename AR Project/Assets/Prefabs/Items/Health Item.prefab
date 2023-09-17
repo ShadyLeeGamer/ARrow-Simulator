@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5317840369396024420}
   - component: {fileID: 5190530166294031636}
   - component: {fileID: 4799324992767472826}
+  - component: {fileID: 8612443155039950285}
   m_Layer: 8
   m_Name: Health Item
   m_TagString: Untagged
@@ -122,3 +123,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 50
+--- !u!135 &8612443155039950285
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5304950393107812818}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 1.5
+  m_Center: {x: 0, y: 0, z: 0}

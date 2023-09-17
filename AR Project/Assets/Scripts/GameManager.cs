@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public const int MAX_NUM_PLAYERS = 4;
+    public const int MIN_NUM_PLAYERS = 2;
+
     public Player[] Players { get; private set; }
     public int CurrentPlayerIndex { get; private set; }
     public Player CurrentPlayer => Players[CurrentPlayerIndex];
@@ -12,6 +15,8 @@ public class GameManager : MonoBehaviour
 
     ArcherPlacer archerPlacer;
     ItemSpawner itemSpawner;
+
+    [SerializeField] GameCanvas canvas;
 
     public static GameManager Instance { get; private set; }
 
@@ -26,15 +31,16 @@ public class GameManager : MonoBehaviour
         itemSpawner = ItemSpawner.Instance;
     }
 
-    public void StartGame(InputField[] playerInputFields)
+    public void StartGame(InputField[] playerInputFields, int numPlayers)
     {
-        Players = new Player[playerInputFields.Length];
-        for (int i = 0; i < playerInputFields.Length; i++)
+        Players = new Player[numPlayers];
+        for (int i = 0; i < numPlayers; i++)
         {
             Players[i] = new Player(playerInputFields[i].text);
         }
 
         StartPlaceTurns();
+        canvas.gameObject.SetActive(true);
     }
 
     bool NextTurn()
@@ -45,29 +51,25 @@ public class GameManager : MonoBehaviour
             return true;
         }
         else
+        {
+            CurrentPlayerIndex = 0; // Wrap
             return false;
+        }
     }
 
     void StartPlaceTurns()
     {
-        CurrentPlayerIndex = 0;
         TurnType = TurnTypes.Place;
         archerPlacer.enabled = true;
     }
 
-    void StartBattleTurns()
-    {
-        itemSpawner.Initialise(archerPlacer.Planes.ToArray());
-        archerPlacer.enabled = false;
-
-        CurrentPlayerIndex = 0;
-        TurnType = TurnTypes.Battle;
-        Players[CurrentPlayerIndex].Archer.SetActive(true);
-    }
-
     public void EndPlaceTurn(Archer archer)
     {
-        Players[CurrentPlayerIndex].SetArcher(archer);
+        CurrentPlayer.SetArcher(archer);
+/*        Debug.LogError("CurrentPlayerIndex:      " + CurrentPlayerIndex);
+        Debug.LogError("CurrentPlayer:      " + CurrentPlayer);
+        Debug.LogError("archer:      " + archer);
+        Debug.LogError("CurrentPlayer.Archer:      " + CurrentPlayer.archer);*/
 
         if (!NextTurn())
         {
@@ -75,32 +77,42 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void StartBattleTurns()
+    {
+        itemSpawner.Initialise(archerPlacer.Planes);
+        archerPlacer.enabled = false;
+        TurnType = TurnTypes.Battle;
+        /*        Debug.LogError("AAA: " + CurrentPlayerIndex);
+                Debug.LogError("BBB: " + CurrentPlayer);
+                Debug.LogError("CCC: " + CurrentPlayer.Archer == null);*/
+        CurrentPlayer.archer.SetActive(true);
+
+    }
+
     public void EndBattleTurn()
     {
         if (!NextTurn())
         {
-            CurrentPlayerIndex = 0; // Wrap
-
             itemSpawner.Spawn();
         }
 
-        Players[CurrentPlayerIndex].Archer.SetActive(true);
+        canvas.SetPowerSlider(CurrentPlayer.archer.LastYRotation);
+        CurrentPlayer.archer.SetActive(true);
     }
 }
 
-public struct Player
+public class Player
 {
-    string name;
-    public Archer Archer { get; private set; }
+    public string Name { get; set; }
+    public Archer archer;
 
     public Player(string name)
     {
-        this.name = name;
-        Archer = null;
+        Name = name;
     }
 
     public void SetArcher(Archer archer)
     {
-        Archer = archer;
+        this.archer = archer;
     }
 }

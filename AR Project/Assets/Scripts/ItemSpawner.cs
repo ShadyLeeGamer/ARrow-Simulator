@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class ItemSpawner : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class ItemSpawner : MonoBehaviour
         Instance = this;
     }
 
-    public void Initialise(UnityEngine.XR.ARFoundation.ARPlane[] wizardPlanes)
+    public void Initialise(List<UnityEngine.XR.ARFoundation.ARPlane> wizardPlanes)
     {
         bounds = wizardPlanes[0].GetComponent<MeshCollider>().bounds;
         foreach (var plane in wizardPlanes)

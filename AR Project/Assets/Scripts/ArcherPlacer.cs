@@ -7,7 +7,7 @@ public class ArcherPlacer : MonoBehaviour
 {
     [SerializeField] Camera cam;
 
-    [SerializeField] Transform ghost;
+    [SerializeField] ArcherPainter ghost;
     [SerializeField] Archer archerPrefab;
 
     Vector3 placePos;
@@ -20,9 +20,9 @@ public class ArcherPlacer : MonoBehaviour
     public List<ARPlane> Planes { get; private set; }
     int bedrockIndex = -1;
 
-    ARRaycastManager raycastManager;
-    ARPlaneManager planeManager;
-    ARAnchorManager anchorManager;
+    [SerializeField] ARRaycastManager raycastManager;
+    [SerializeField] ARPlaneManager planeManager;
+    [SerializeField] ARAnchorManager anchorManager;
 
     [SerializeField] Material platformMat, bedrockMat, wallCeilingMat;
 
@@ -34,17 +34,16 @@ public class ArcherPlacer : MonoBehaviour
     {
         Instance = this;
 
-        raycastManager = GetComponent<ARRaycastManager>();
-        planeManager = GetComponent<ARPlaneManager>();
-        anchorManager = GetComponent<ARAnchorManager>();
+        planeManager.planesChanged += OnPlanesChanged;
     }
 
     private void Start()
     {
         gameManager = GameManager.Instance;
-        Planes = new (gameManager.Players.Length);
+        Planes = new List<ARPlane>(gameManager.Players.Length);
+        planeManager.enabled = raycastManager.enabled = anchorManager.enabled = true;
 
-        planeManager.planesChanged += OnPlanesChanged;
+        RefreshGhost();
     }
 
     private void Update()
@@ -57,9 +56,14 @@ public class ArcherPlacer : MonoBehaviour
         }
     }
 
+    void RefreshGhost()
+    {
+        ghost.PaintWhole(gameManager.CurrentPlayerIndex);
+    }
+
     void PreviewGhostOnPlane()
     {
-        Vector2 screenCenter = cam.ViewportToScreenPoint(new Vector3(0.5f, 0.5f));
+        Vector2 screenCenter = cam.ViewportToScreenPoint(new Vector2(0.5f, 0.5f));
         List<ARRaycastHit> hits = new();
         if (raycastManager.Raycast(screenCenter, hits,
             TrackableType.PlaneWithinPolygon))
@@ -72,12 +76,12 @@ public class ArcherPlacer : MonoBehaviour
                 pose = hit.pose;
                 this.plane = plane;
 
-                ghost.position = placePos = pose.position;
+                ghost.transform.position = placePos = pose.position;
 
                 Vector3 dirToCam = cam.transform.position - placePos;
                 dirToCam.y = 0;
                 placeRot = Quaternion.LookRotation(dirToCam);
-                ghost.rotation = placeRot;
+                ghost.transform.rotation = placeRot;
             }
         }
     }
@@ -103,7 +107,8 @@ public class ArcherPlacer : MonoBehaviour
     public void PendOnPlane()
     {
         pendingArcher = Instantiate(archerPrefab, placePos, placeRot);
-        pendingArcher.Initialise(cam);
+        pendingArcher.Initialise(
+            cam, gameManager.CurrentPlayer.Name, gameManager.CurrentPlayerIndex);
         pendingArcher.gameObject.AddComponent<ARAnchor>();
     }
 
@@ -129,6 +134,9 @@ public class ArcherPlacer : MonoBehaviour
         TrackPlane(plane);
 
         gameManager.EndPlaceTurn(pendingArcher);
+
+        RefreshGhost();
+
         pendingArcher = null;
     }
 
@@ -151,6 +159,6 @@ public class ArcherPlacer : MonoBehaviour
             }
         }
 
-        planeManager.enabled = false;
+        planeManager.enabled = raycastManager.enabled = anchorManager.enabled = false;
     }
 }

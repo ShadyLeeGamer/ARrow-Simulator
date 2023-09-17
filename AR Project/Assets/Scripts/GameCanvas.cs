@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,13 +14,6 @@ public class GameCanvas : MonoBehaviour
     ArcherPlacer archerPlacer;
     GameManager gameManager;
 
-    public static GameCanvas Instance { get; private set; }
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
     private void Start()
     {
         EnableButtons(placeButtons);
@@ -35,7 +27,7 @@ public class GameCanvas : MonoBehaviour
         if (gameManager.TurnType == GameManager.TurnTypes.Battle &&
             joystick.Direction != Vector2.zero)
         {
-            gameManager.CurrentPlayer.Archer.TurnHorizontally(joystick.Direction.x);
+            gameManager.CurrentPlayer.archer.TurnHorizontally(joystick.Direction.x);
         }
     }
 
@@ -71,17 +63,22 @@ public class GameCanvas : MonoBehaviour
 
     public void FirePowerSliderBegin()
     {
-        gameManager.CurrentPlayer.Archer.FireBegin();
+        gameManager.CurrentPlayer.archer.FireBegin();
     }
 
     public void FirePowerSliderHold()
     {
-        gameManager.CurrentPlayer.Archer.FireHold(powerSlider.value);
+        gameManager.CurrentPlayer.archer.FireHold(powerSlider.value);
     }
 
     public void FirePowerSliderRelease()
     {
-        gameManager.CurrentPlayer.Archer.FireRelease(powerSlider.value);
+        gameManager.CurrentPlayer.archer.FireRelease(powerSlider.value);
         powerSlider.value = 0;
+    }
+
+    public void SetPowerSlider(float value)
+    {
+        powerSlider.value = value;
     }
 }

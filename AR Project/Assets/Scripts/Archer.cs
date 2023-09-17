@@ -2,16 +2,20 @@ using UnityEngine;
 
 public class Archer : MonoBehaviour
 {
+    int colourIndex;
+
     [SerializeField] float horizontalTurnSpeed;
 
     [SerializeField] Transform firePoint;
-    [SerializeField] Fireball fireballPrefab;
-    [SerializeField] float firePowerMin, firePowerMax;
+    [SerializeField] Arrow arrowPrefab;
     [SerializeField] float firePower;
 
-    [SerializeField] Transform neckRig;
+    [SerializeField] Transform tiltX, tiltY;
+
+    ArcherPainter painter;
 
     [SerializeField] Canvas UI;
+    [SerializeField] UnityEngine.UI.Text nameLabel;
 
     [SerializeField] Bar healthBar;
     [SerializeField] int maxHealth;
@@ -22,20 +26,27 @@ public class Archer : MonoBehaviour
     [SerializeField] Animator animator;
     ProjectionDrawer projectionDrawer;
 
-    [SerializeField] float fireballPosAimOffset;
     TrailRenderer lastTrajectory;
-    Fireball fireball;
+
+    public float LastYRotation { get; private set; }
 
     public bool Active { get; set; }
-
-    public void Initialise(Camera cam)
-    {
-        this.cam = cam;
-    }
 
     private void Awake()
     {
         projectionDrawer = GetComponent<ProjectionDrawer>();
+        painter = GetComponent<ArcherPainter>();
+    }
+
+    public void Initialise(Camera cam, string name, int colourIndex)
+    {
+        this.cam = cam;
+
+        nameLabel.text = name;
+
+        this.colourIndex = colourIndex;
+        painter.PaintHair(colourIndex);
+        projectionDrawer.SetColour(colourIndex);
     }
 
     private void Start()
@@ -48,7 +59,7 @@ public class Archer : MonoBehaviour
         if (!Active)
             return;
 
-        transform.Rotate(0f, deltaX * horizontalTurnSpeed, 0f);
+        tiltX.Rotate(0f, deltaX * horizontalTurnSpeed, 0f);
     }
 
     private void Update()
@@ -64,20 +75,21 @@ public class Archer : MonoBehaviour
     {
         if (!Active)
             return;
-        fireball =
-            Instantiate(fireballPrefab, firePoint.position, Quaternion.identity);
-        fireball.enabled = false;
     }
+
+    Vector3 FireVelocity => firePoint.forward * firePower;
 
     public void FireHold(float powerPercent)
     {
         if (!Active)
             return;
 
-        firePoint.eulerAngles = new Vector3(Mathf.Lerp(90, -90, powerPercent),
-            firePoint.eulerAngles.y, firePoint.eulerAngles.z);
-        fireball.transform.position = firePoint.position
-            + -firePoint.forward * fireballPosAimOffset;
+        tiltY.eulerAngles = new Vector3(Mathf.Lerp(90, -90, powerPercent),
+            tiltY.eulerAngles.y, tiltY.eulerAngles.z);
+
+        projectionDrawer.DrawWhole(firePoint.position, FireVelocity);
+
+        animator.Play("FireHold");
     }
 
     public void FireRelease(float powerPercent)
@@ -85,12 +97,13 @@ public class Archer : MonoBehaviour
         if (!Active)
             return;
 
-        Vector3 fireVelocity = firePoint.forward * firePower;
-        fireball.enabled = true;
-        fireball.Initialise(fireVelocity);
-        //projectionDrawer.DrawWhole(firePoint.position, fireVelocity);
+        projectionDrawer.Clear();
 
-        animator.Play("Fire");
+        Instantiate(arrowPrefab, firePoint.position, Quaternion.identity)
+            .Initialise(FireVelocity, colourIndex);
+        LastYRotation = powerPercent;
+
+        animator.Play("FireRelease");
 
         SetActive(false);
     }
@@ -111,6 +124,7 @@ public class Archer : MonoBehaviour
         if (health > 0)
         {
             healthBar.SetValue(health);
+
             animator.Play("Hurt");
         }
         else
@@ -135,10 +149,5 @@ public class Archer : MonoBehaviour
     public void SetActive(bool active)
     {
         Active = active;
-
-        if (!active)
-        {
-            projectionDrawer.Clear();
-        }
     }
 }
