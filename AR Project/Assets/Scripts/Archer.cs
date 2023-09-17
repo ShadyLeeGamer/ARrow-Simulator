@@ -65,7 +65,7 @@ public class Archer : MonoBehaviour
     private void Update()
     {
         Vector3 dirToCam = cam.transform.position - transform.position;
-        UI.transform.rotation = Quaternion.LookRotation(dirToCam);
+        UI.transform.rotation = Quaternion.LookRotation(-dirToCam.normalized);
 
         if (!Active)
             return;

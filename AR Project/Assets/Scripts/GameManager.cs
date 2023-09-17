@@ -66,10 +66,6 @@ public class GameManager : MonoBehaviour
     public void EndPlaceTurn(Archer archer)
     {
         CurrentPlayer.SetArcher(archer);
-/*        Debug.LogError("CurrentPlayerIndex:      " + CurrentPlayerIndex);
-        Debug.LogError("CurrentPlayer:      " + CurrentPlayer);
-        Debug.LogError("archer:      " + archer);
-        Debug.LogError("CurrentPlayer.Archer:      " + CurrentPlayer.archer);*/
 
         if (!NextTurn())
         {
@@ -82,9 +78,7 @@ public class GameManager : MonoBehaviour
         itemSpawner.Initialise(archerPlacer.Planes);
         archerPlacer.enabled = false;
         TurnType = TurnTypes.Battle;
-        /*        Debug.LogError("AAA: " + CurrentPlayerIndex);
-                Debug.LogError("BBB: " + CurrentPlayer);
-                Debug.LogError("CCC: " + CurrentPlayer.Archer == null);*/
+
         CurrentPlayer.archer.SetActive(true);
 
     }
@@ -96,7 +90,7 @@ public class GameManager : MonoBehaviour
             itemSpawner.Spawn();
         }
 
-        canvas.SetPowerSlider(CurrentPlayer.archer.LastYRotation);
+        //canvas.SetPowerSlider(CurrentPlayer.archer.LastYRotation);
         CurrentPlayer.archer.SetActive(true);
     }
 }

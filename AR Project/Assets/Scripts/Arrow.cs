@@ -23,14 +23,11 @@ public class Arrow : MonoBehaviour
 
         trailRenderer = GetComponent<TrailRenderer>();
         trailRenderer.material.color = colours[colourIndex];
-        //SetColour(colourIndex);
     }
 
     private void Start()
     {
         gameManager = GameManager.Instance;
-        trailRenderer = GetComponent<TrailRenderer>();
-        trailRenderer.material.color = colours[0];
     }
 
     private void Update()

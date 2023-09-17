@@ -147,16 +147,16 @@ public class ArcherPlacer : MonoBehaviour
 
     public void OnDisable()
     {
-        foreach (ARPlane plane in planeManager.trackables)
+/*        foreach (ARPlane plane in planeManager.trackables)*/
+        foreach (ARPlane plane in Planes)
         {
-            if (!Planes.Contains(plane))
-            {
-                plane.GetComponent<MeshRenderer>().enabled = false;
-            }
-            else
-            {
-                plane.gameObject.SetActive(false);
-            }
+            Destroy(plane.gameObject);
+        }
+
+        ARPlane[] planes = FindObjectsOfType<ARPlane>();
+        foreach (ARPlane plane in planes)
+        {
+            Destroy(plane.gameObject);
         }
 
         planeManager.enabled = raycastManager.enabled = anchorManager.enabled = false;

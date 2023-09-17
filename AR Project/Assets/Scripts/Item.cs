@@ -9,5 +9,8 @@ public abstract class Item : MonoBehaviour
         gameManager = GameManager.Instance;
     }
 
-    public abstract void Use();
+    public virtual void Use()
+    {
+        Destroy(gameObject);
+    }
 }

@@ -1810,7 +1810,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 11421782, guid: ca2098eda18954719933727edf727b2e, type: 3}
       propertyPath: m_Text
-      value: Epic ARrow Simulator
+      value: ARrow Simulator
       objectReference: {fileID: 0}
     - target: {fileID: 11421782, guid: ca2098eda18954719933727edf727b2e, type: 3}
       propertyPath: m_FontData.m_Alignment

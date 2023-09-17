@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HealthItem : Item
@@ -9,5 +7,7 @@ public class HealthItem : Item
     public override void Use()
     {
         gameManager.CurrentPlayer.archer.AddHealth(health);
+
+        base.Use(); // Destroy
     }
 }
